@@ -1,0 +1,581 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Gotta Catch 'em All!</title>
+        <style>
+            #left {
+                width: 50%;
+                float: left;
+                box-sizing: border-box;
+                background-color: forestgreen;
+                position: relative;
+            }
+            #right {
+            width: 50%;
+                float: left;
+                box-sizing: border-box;
+                padding-left: 20px;
+            }
+            #background {
+                width: 100%;
+            }
+            .grass {
+                position: absolute;    
+                width: 30%;            
+            }
+            #grass1 {
+                bottom: 0px;
+                left: 0px;
+            }
+            #grass3 {
+                bottom: 0px;
+                right: 0px;
+            }
+            #grass2 {
+                bottom: 0px;
+                left: 35%;
+            }
+            .grass:hover {
+                background-color: rgba(255,255,0,0.5);
+            }
+            #button_playagain {
+                display: none;
+            }
+            #gameover {
+                display: none;
+            }
+            #button_startover {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="left">
+                <img id="background" src="images/environment_forestbackground.png">
+                <img id="grass1" class="grass" src="images/grass.png">
+                <img id="grass2" class="grass" src="images/grass.png">
+                <img id="grass3" class="grass" src="images/grass.png">
+                <p id="histogram"></p>
+            </div>
+            <div id="right">
+                <h1>Gotta Catch 'em All</h1>
+                <p>Your goal in this game is to catch as many pokemon as possible before you run out of Pokeballs. Click on a grass patch to begin playing.</p>
+                <h2 id="status">Status</h2>
+                <p>Pokeballs Left: <span id="pokeballs_left">5</span></p>
+                <p>Pokemon Caught: <span id="pokemon_caught">0</span></p>
+                <button id="button_playagain">Play Again</button>            
+                <p id="gameover">Game Over!</p>
+                <button id="button_startover">Start Over</button>
+                <p id="history"></p>
+            </div>
+        </div>
+
+        <script>
+            // register some global vars to hold onto the dom references we will need for this project
+            let grass1 = document.getElementById('grass1');
+            let grass2 = document.getElementById('grass2');
+            let grass3 = document.getElementById('grass3');
+            let pokeballs_left = document.getElementById('pokeballs_left');
+            let status = document.getElementById('status');
+            let pokemon_caught = document.getElementById('pokemon_caught');
+            let button_playagain = document.getElementById('button_playagain');
+            let gameover = document.getElementById('gameover');
+            let startover = document.getElementById('button_startover');
+            let history = document.getElementById('history');
+            let histgram = document.getElementById('histogram');
+
+            // create some working variables in JS that we can change
+            let pokeballs = 5;
+            let caught = 0;
+            // possible pokemon
+            let pokemons = [
+                {name:'Pikachu', image:'images/pikachu.png'}, 
+                {name:'Bulbasaur', image:'images/bulbasaur.png'},
+                {name:'Charmander', image:'images/charmander.png'},
+                {name:'Eevee', image:'images/eevee.png'},
+                {name:'Squirtle', image:'images/squirtle.png'},
+                {name:'Jigglypuff', image:'images/jigglypuff.png'},
+            ]
+
+            let track = [];
+
+            // when the play again button is clicked
+            button_playagain.onclick = function() {
+                // reset all grass to the original image
+                grass1.src = 'images/grass.png';
+                grass2.src = 'images/grass.png';
+                grass3.src = 'images/grass.png';
+                grass1.style.opacity = 1;
+                grass2.style.opacity = 1;
+                grass3.style.opacity = 1;
+                grass1.style.display = 'block';
+                grass2.style.display = 'block';
+                grass3.style.display = 'block';
+
+                // hide the play again button
+                button_playagain.style.display = 'none';
+            }
+            
+            // when the start over button is clicked
+            button_startover.onclick = function() {
+                // reset all grass to the original image
+                grass1.src = 'images/grass.png';
+                grass2.src = 'images/grass.png';
+                grass3.src = 'images/grass.png';
+                grass1.style.opacity = 1;
+                grass2.style.opacity = 1;
+                grass3.style.opacity = 1;
+                grass1.style.display = 'block';
+                grass2.style.display = 'block';
+                grass3.style.display = 'block';
+
+                // hide the play again button and game over message
+                gameover.style.display = 'none';
+                button_startover.style.display = 'none';
+
+                // reset the # of pokeballs
+                history.innerText = '';
+                track = [];
+                pokeballs = 5;
+                pokeballs_left.innerText = pokeballs;
+                caught = 0;
+                pokemon_caught.innerText = caught;
+            }
+
+            // when the user clicks on grass1, do this!
+            grass1.onclick = function() {
+                // don't let the user click the grass again until the play again button has been hidden
+                if (button_playagain.style.display == 'block') {
+                    // don't do anything!
+                    alert("Cheater!");
+                    return;
+                }
+                // don't let the user click the grass again since game is over
+                if (gameover.style.display == 'block') {
+                    // don't do anything!
+                    alert("Game Over!");
+                    return;
+                }
+
+
+                // update the # of pokeballs (decrease)
+                pokeballs -= 1;
+
+                // update the display for the user
+                pokeballs_left.innerText = pokeballs;
+
+                // figure out what's behind the grass
+                // 33% of nothing!
+                // 33% of 2 more pokeballs
+                // 33% of a pokemon
+                let chance = parseInt( Math.random() * 3 );
+                let super_chance = parseInt( Math.random() * 5 );
+                let reveal_chance = parseInt( Math.random() * 2 );
+                if (chance == 0) {
+                    // nothing!
+
+                    // hide the grass
+                    grass1.style.display = 'none';
+
+                    status.innerText = 'Nothing here!';  
+                    track.push('nothing');  
+                    // reveal the other grasses with opacity 0.5
+                    grass2.style.opacity = 0.5;
+                    grass3.style.opacity = 0.5;
+                    if (super_chance == 0) {
+                        grass2.src = 'images/pokeballs4x.png';
+                    } else {
+                        grass2.src = 'images/pokeballs.png';
+                    }
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass3.src = pokemons[5].image;
+                    } else {
+                        let index = parseInt( Math.random() * 5 );
+                        grass3.src = pokemons[index].image;
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass2.src;
+                        grass2.src = grass3.src;
+                        grass3.src = temp;
+                    }
+                            
+                }
+                else if (chance == 1) {
+                    if (super_chance == 0) {
+                        // +4 pokeballs
+                        grass1.src = 'images/pokeballs4x.png';
+                        pokeballs+=4;
+                        pokeballs_left.innerText = pokeballs;
+                        status.innerText = "You're in 'Super Item' mode!\nYou found +4 pokeballs!";
+                        track.push('4 pokeballs');
+                    } else {
+                        // +2 pokeballs
+
+                        // change the graphic on the grass
+                        grass1.src = 'images/pokeballs.png';
+                        pokeballs+=2;    
+
+                        // update the display for the user
+                        pokeballs_left.innerText = pokeballs;  
+
+                        status.innerText = 'You found +2 pokeballs!';
+                        track.push('2 pokeballs');
+                    }
+                    // reveal the other grasses with opacity 0.5
+                    grass2.style.opacity = 0.5;
+                    grass3.style.opacity = 0.5;                    
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass3.src = pokemons[5].image;
+                    } else {
+                        let index = parseInt( Math.random() * 5 );
+                        grass3.src = pokemons[index].image;
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass2.src;
+                        grass2.src = grass3.src;
+                        grass3.src = temp;
+                    }
+                }
+                else if (chance == 2) {
+                    if (super_chance == 0) {
+                        // you found jigglypuff
+                        grass1.src = pokemons[5].image;
+                        pokeballs_left.innerText = pokeballs;
+                        caught += 1;
+                        pokemon_caught.innerText = caught;
+                        status.innerText = "You're in 'Super Item' mode!\nYou caught a "+ pokemons[5].name +"!";
+                        track.push(pokemons[5].name);
+                    } else {
+                        // you found a pokemon
+                        let index = parseInt( Math.random() * 5 );
+                        grass1.src = pokemons[index].image;
+                        pokemons[index].count, caught += 1;
+                        pokemon_caught.innerText = caught;
+
+                        status.innerText = 'You caught a '+ pokemons[index].name +'!';
+                        track.push(pokemons[index].name);
+                    }
+                    // reveal the other grasses with opacity 0.5
+                    grass2.style.opacity = 0.5;
+                    grass3.style.opacity = 0.5;
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass3.src = 'images/pokeballs4x.png';
+                    } else {
+                        grass3.src = 'images/pokeballs.png';
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass2.src;
+                        grass2.src = grass3.src;
+                        grass3.src = temp;
+                    }
+                }
+
+                if (pokeballs == 0) {
+                    // game over!
+                    gameover.style.display = 'block';
+                    startover.style.display = 'block';
+                    history.innerText = 'You most recently found: \n' + track.reverse().join('\n');                    
+                    return;
+                }
+
+                // show the play again button
+                button_playagain.style.display = 'block';
+            
+            }
+
+
+            // when the user clicks on grass2, do this!
+            grass2.onclick = function() {
+                // don't let the user click the grass again until the play again button has been hidden
+                if (button_playagain.style.display == 'block') {
+                    // don't do anything!
+                    alert("Cheater!");
+                    return;
+                }
+                // don't let the user click the grass again since game is over
+                if (gameover.style.display == 'block') {
+                    // don't do anything!
+                    alert("Game Over!");
+                    return;
+                }
+
+                // update the # of pokeballs (decrease)
+                pokeballs -= 1;
+
+                // update the display for the user
+                pokeballs_left.innerText = pokeballs;
+
+                // figure out what's behind the grass
+                // 33% of nothing!
+                // 33% of 2 more pokeballs
+                // 33% of a pokemon
+                let chance = parseInt( Math.random() * 3 );
+                let super_chance = parseInt( Math.random() * 5 );
+                let reveal_chance = parseInt( Math.random() * 2 );
+                if (chance == 0) {
+                    // nothing!
+
+                    // hide the grass
+                    grass2.style.display = 'none';
+
+                    status.innerText = 'Nothing here!';
+                    track.push('nothing');  
+                    
+                    // reveal the other grasses with opacity 0.5
+                    grass1.style.opacity = 0.5;
+                    grass3.style.opacity = 0.5;
+                    if (super_chance == 0) {
+                        grass1.src = 'images/pokeballs4x.png';
+                    } else {
+                        grass1.src = 'images/pokeballs.png';
+                    }
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass3.src = pokemons[5].image;
+                    } else {
+                        let index = parseInt( Math.random() * 5 );
+                        grass3.src = pokemons[index].image;
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass1.src;
+                        grass1.src = grass3.src;
+                        grass3.src = temp;
+                    }
+                }
+                else if (chance == 1) {
+                    if (super_chance == 0) {
+                        // +4 pokeballs
+                        grass2.src = 'images/pokeballs4x.png';
+                        pokeballs+=4;
+                        pokeballs_left.innerText = pokeballs;
+                        status.innerText = "You're in 'Super Item' mode!\nYou found +4 pokeballs!";
+                        track.push('4 pokeballs');
+                    } else {
+                        // +2 pokeballs
+
+                        // change the graphic on the grass
+                        grass2.src = 'images/pokeballs.png';
+                        pokeballs+=2;    
+
+                        // update the display for the user
+                        pokeballs_left.innerText = pokeballs;  
+
+                        status.innerText = 'You found +2 pokeballs!';
+                        track.push('2 pokeballs');
+                    }
+                    // reveal the other grasses with opacity 0.5
+                    grass1.style.opacity = 0.5;
+                    grass3.style.opacity = 0.5;
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass3.src = pokemons[5].image;
+                    } else {
+                        let index = parseInt( Math.random() * 5 );
+                        grass3.src = pokemons[index].image;
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass1.src;
+                        grass1.src = grass3.src;
+                        grass3.src = temp;
+                    }
+                }
+                else if (chance == 2) {
+                    if (super_chance == 0) {
+                        // you found jigglypuff
+                        grass2.src = pokemons[5].image;
+                        pokeballs_left.innerText = pokeballs;
+                        status.innerText = "You're in 'Super Item' mode!\nYou caught a "+ pokemons[5].name +"!";
+                        caught += 1;
+                        pokemon_caught.innerText = caught;
+                        track.push(pokemons[5].name);
+                    } else {
+                        // you found a pokemon
+                        let index = parseInt( Math.random() * 5 );
+                        grass2.src = pokemons[index].image;
+                        pokemons[index].count, caught += 1;
+                        pokemon_caught.innerText = caught;
+
+                        status.innerText = 'You caught a '+ pokemons[index].name +'!';
+                        track.push(pokemons[index].name);                       
+                    }
+                    // reveal the other grasses with opacity 0.5
+                    grass1.style.opacity = 0.5;
+                    grass3.style.opacity = 0.5;
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass3.src = 'images/pokeballs4x.png';
+                    } else {
+                        grass3.src = 'images/pokeballs.png';
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass1.src;
+                        grass1.src = grass3.src;
+                        grass3.src = temp;
+                    }
+                }
+
+                if (pokeballs == 0) {
+                    // game over!
+                    gameover.style.display = 'block';
+                    startover.style.display = 'block';
+                    history.innerText = 'You most recently found: \n' + track.reverse().join('\n');
+            
+                    return;
+                }
+
+                // show the play again button
+                button_playagain.style.display = 'block';
+            
+            }
+
+
+            // when the user clicks on grass3, do this!
+            grass3.onclick = function() {
+                // don't let the user click the grass again until the play again button has been hidden
+                if (button_playagain.style.display == 'block') {
+                    // don't do anything!
+                    alert("Cheater!");
+                    return;
+                }
+                // don't let the user click the grass again since game is over
+                if (gameover.style.display == 'block') {
+                    // don't do anything!
+                    alert("Game Over!");
+                    return;
+                }
+
+
+                // update the # of pokeballs (decrease)
+                pokeballs -= 1;
+
+                // update the display for the user
+                pokeballs_left.innerText = pokeballs;
+
+                // figure out what's behind the grass
+                // 33% of nothing!
+                // 33% of 2 more pokeballs
+                // 33% of a pokemon
+                let chance = parseInt( Math.random() * 3 );
+                let super_chance = parseInt( Math.random() * 5 );
+                let reveal_chance = parseInt( Math.random() * 2 );
+                if (chance == 0) {
+                    // nothing!
+
+                    // hide the grass
+                    grass3.style.display = 'none';
+
+                    status.innerText = 'Nothing here!';
+                    track.push('nothing');  
+                    // reveal the other grasses with opacity 0.5
+                    grass1.style.opacity = 0.5;
+                    grass2.style.opacity = 0.5;
+                    if (super_chance == 0) {
+                        grass1.src = 'images/pokeballs4x.png';
+                    } else {
+                        grass1.src = 'images/pokeballs.png';
+                    }
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass2.src = pokemons[5].image;
+                    } else {
+                        let index = parseInt( Math.random() * 5 );
+                        grass2.src = pokemons[index].image;
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass1.src;
+                        grass1.src = grass2.src;
+                        grass2.src = temp;
+                    } 
+                }
+                else if (chance == 1) {
+                    if (super_chance == 0) {
+                        // +4 pokeballs
+                        grass3.src = 'images/pokeballs4x.png';
+                        pokeballs+=4;
+                        pokeballs_left.innerText = pokeballs;
+                        status.innerText = "You're in 'Super Item' mode!\nYou found +4 pokeballs!";
+                        track.push('4 pokeballs');
+                    } else{
+                        // +2 pokeballs
+
+                        // change the graphic on the grass
+                        grass3.src = 'images/pokeballs.png';
+                        pokeballs+=2;    
+
+                        // update the display for the user
+                        pokeballs_left.innerText = pokeballs;  
+
+                        status.innerText = 'You found +2 pokeballs!';
+                        track.push('2 pokeballs');
+                    }
+                    // reveal the other grasses with opacity 0.5
+                    grass1.style.opacity = 0.5;
+                    grass2.style.opacity = 0.5;
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass2.src = pokemons[5].image;
+                    } else {
+                        let index = parseInt( Math.random() * 5 );
+                        grass2.src = pokemons[index].image;
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass1.src;
+                        grass1.src = grass2.src;
+                        grass2.src = temp;
+                    }
+                }
+                else if (chance == 2) {
+                    if (super_chance == 0) {
+                        // you found a jigglypuff
+                        grass3.src = pokemons[5].image;
+                        pokeballs_left.innerText = pokeballs;
+                        caught += 1;
+                        pokemon_caught.innerText = caught;
+                        status.innerText = "You're in 'Super Item' mode!\nYou caught a "+ pokemons[5].name +"!";
+                        track.push(pokemons[5].name);
+                    } else {
+                        // you found a pokemon
+                        let index = parseInt( Math.random() * 5 );
+                        grass3.src = pokemons[index].image;
+                        pokemons[index].count, caught += 1;
+                        pokemon_caught.innerText = caught;
+
+                        status.innerText = 'You caught a '+ pokemons[index].name +'!';
+                        track.push(pokemons[index].name);                        
+                    }
+                    // reveal the other grasses with opacity 0.5
+                    grass1.style.opacity = 0.5;
+                    grass2.style.opacity = 0.5;
+                    super_chance = parseInt( Math.random() * 5 );
+                    if (super_chance == 0) {
+                        grass2.src = 'images/pokeballs4x.png';
+                    } else {
+                        grass2.src = 'images/pokeballs.png';
+                    }
+                    if (reveal_chance == 0) {
+                        let temp = grass1.src;
+                        grass1.src = grass2.src;
+                        grass2.src = temp;
+                    }
+                }
+
+                if (pokeballs == 0) {
+                    // game over!
+                    gameover.style.display = 'block';
+                    startover.style.display = 'block';
+                    history.innerText = 'You most recently found: \n' + track.reverse().join('\n');
+                    return;
+                }
+
+                // show the play again button
+                button_playagain.style.display = 'block';
+            
+            }
+
+        </script>
+    </body>
+</html>

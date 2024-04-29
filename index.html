@@ -1,0 +1,139 @@
+
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Web Development Portfolio</title>
+    <style type="text/css">
+        header {
+            background-color: #333; 
+            color: white; 
+            padding: 20px; 
+            position: fixed;
+            width: 100%;
+            top: 0; 
+            left: 0;
+            text-align: center;
+        }
+        footer {
+            background-color: #333; 
+            color: white;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0; 
+            left: 0;
+            text-align: center; 
+        }
+        .box {
+            height: 100px;
+            margin: 10px;
+            position: fixed;
+            background-color: #ccc;
+            display: inline-block;
+            text-align: center;
+            line-height: 100px;
+            position: relative;
+        }
+        #image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 60px;
+            width: 60px;            
+            border-radius: 200px;
+            border: 5px dashed yellow;
+        }
+
+        @media only screen and (max-width: 1440px) and (min-width: 1201px) {
+            #images {                
+                width: 70px;
+                height: 70px;
+            }
+        }
+        @media only screen and (max-width: 1200px) and (min-width: 481px) {
+            #images {                
+                width: 60px;
+                height: 60px;
+            }
+        }
+        @media only screen and (min-width: 961px) {
+            .box {
+                width: calc(9% - 35px); 
+            }
+        }
+        @media only screen and (max-width: 960px) and (min-width: 481px) {
+            .box {
+                width: calc(17% - 30px); 
+            }
+        }
+        @media only screen and (max-width: 480px) {
+            .box {
+                width: calc(100% - 15px); 
+            }
+        }
+        body {
+            padding-top: 120px; 
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Web Development Portfolio</h1>
+    </header>
+    <a class="box" href="#">
+        <img id="image" src="./images/plants/peashooter.jpg"   alt="peashooter">
+      </a>
+    <a class="box" href="./macro02/index.html">
+        <img id="image" src="./images/plants/sunflower.jpg"   alt="sunflower">
+        </a>
+    <a class="box" href="./macro03/index.html">
+        <img id="image" src="./images/plants/cherry.jpg"   alt="cherry">
+        </a>
+    <a class="box" href="./macro04/index.html">
+        <img id="image" src="./images/plants/wallnut.jpg"   alt="wallnut">
+        </a>
+    <a class="box" href="./macro05/index.html">
+        <img id="image" src="./images/plants/potato.jpg"   alt="potato">
+        </a>
+    <a class="box" href="./macro06/index.html">
+        <img id="image" src="./images/plants/snowpea.jpg"   alt="snow pea">
+        </a>    
+    <a class="box" href="./micro06/micro06.php">
+        <img id="image" src="./images/zombies/normal.jpg"   alt="normal">
+        </a>
+    <a class="box" href="./macro07/index.php">
+        <img id="image" src="./images/zombies/conehead.jpg"   alt="conehead">
+        </a>
+    <a class="box" href="./micro07/index.php">
+        <img id="image" src="./images/zombies/pole.jpg"   alt="pole">
+        </a>
+    <a class="box" href="./macro08/index.php">
+        <img id="image" src="./images/zombies/buckethead.jpg"   alt="buckethead">
+        </a>
+    <a class="box" href="#">
+        <img id="image" src="./images/zombies/screendoor.jpg"   alt="screen door">
+        </a>
+    <a class="box" href="#">
+        <img id="image" src="./images/zombies/football.jpg"   alt="football">
+        </a>
+    <script>
+        let boxes = document.querySelectorAll('.box');
+        boxes.forEach(function(box) {
+            box.addEventListener('mouseover', function() {
+                this.style.backgroundColor = 'red';
+            });
+            
+            box.addEventListener('mouseout', function() {
+                this.style.backgroundColor = '#ccc'; 
+            });
+        });
+    </script>
+    
+    <footer>
+        © Leo Yao
+    </footer>
+</body>
+</html>

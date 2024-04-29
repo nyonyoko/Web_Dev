@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Design Your own Hogwarts!</title>
+    <style type="text/css">
+      .container {
+        display: flex;
+      }
+      
+      .left-column {
+        width: 320px;
+      }
+      
+      .right-column {
+        flex-grow: 1;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      
+      .map-container {
+        width: 320px;
+        height: 320px;
+        border: 1px solid black;
+      }
+      
+      .image {
+        width: 32px;
+        height: 32px;
+        margin: 2px;
+      }  
+
+      .right_selected {
+        border: 2px solid yellow;
+      }
+      
+      .left_selected:hover {
+        border: 2px solid red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Design Your Own Hogwarts!</h1>
+    <div class="container">
+      <div class="left-column">
+        <div id="map" class="map-container"></div>
+      </div>
+      <div class="right-column" id="image-container">
+        <!-- Images will be dynamically loaded here -->
+      </div>
+    </div>
+
+    <!-- load in the image array file - this makes available a new array of all image filenames that you can use for this project -->
+    <!-- Assets courtesy of Crawl Stone Soup: https://github.com/crawl/tiles -->
+    <script src="image_array.js"></script>
+
+    <!-- write your code here -->
+    <script>      
+      // Get the map container
+      let mapContainer = document.getElementById('map');
+
+      // Create a 10x10 grid for the map
+      for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+          let tile = document.createElement('div');
+          tile.classList.add('left_selected'); // Add class for hover effect
+          tile.style.width = '32px';
+          tile.style.height = '32px';
+          tile.style.boxSizing = 'border-box';
+          tile.style.float = 'left';
+          mapContainer.appendChild(tile);
+        }
+        let clearDiv = document.createElement('div');
+        clearDiv.style.clear = 'both';
+        mapContainer.appendChild(clearDiv);
+      }
+
+      // Get the image container
+      let imageContainer = document.getElementById('image-container');
+
+      // Create an image element for each image in the image array
+      for (let i = 0; i < array_library.length; i++) {
+        let img = document.createElement('img');
+        img.src = array_library[i];
+        img.style.width = '32px';
+        img.style.height = '32px';
+        img.style.margin = '1px';
+        img.classList.add('image'); // Add class for click event
+        imageContainer.appendChild(img);
+
+        // Add click event listener to each image
+        img.addEventListener('click', function() {
+          // Remove the selected class from all images
+          let images = document.getElementsByClassName('image');
+          for (let j = 0; j < images.length; j++) {
+            images[j].classList.remove('right_selected');
+          }
+          // Add the selected class to the clicked image
+          img.classList.add('right_selected');
+          // Update the selected image src
+          selectedImage = img.src;
+        });
+      }
+
+      // Add click event listener for mouse clicks
+      let mapTiles = document.getElementsByClassName('left_selected');
+      for (let i = 0; i < mapTiles.length; i++) {
+        mapTiles[i].addEventListener('click', function() {
+          // Check if an image is selected
+          if (selectedImage !== null) {
+            // Update the background image
+            mapTiles[i].style.backgroundImage = `url(${selectedImage})`;
+          }
+        });
+      }
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Everything is Awesome</title>
+        <style>
+            #container {
+                width: 800px;
+                height: 600px;
+                border: 1px solid black;
+                position: relative;
+                margin: auto;
+            }
+
+            #background {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+            }
+
+            #heading {
+                margin-left: 30px;
+                color: white;
+                text-shadow: 2px 2px 4px #000000;
+            }
+
+            #info_box {
+                background-color: #ccccccdd;
+                padding: 20px;
+                width: 50%;
+                border-radius: 20px;
+                margin-left: 20px;
+            }
+            #body {
+                position: absolute;
+                bottom: -55px;
+                right: 80px;
+                transform: scale(0.6)
+            }
+            #head {
+                position: absolute;
+                right: 155px;
+                bottom: 146px;
+                transform: scale(0.6)
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <script>
+                
+                let userInput;
+                do {
+                    userInput = prompt("Please enter a positive number greater than or equal to 3:");
+                } while (isNaN(userInput) || userInput < 3 || userInput <= 0);
+                
+                const words = ['Awesome', 'Fantastic', 'Fabulous', 'Superb', 'Perfect', 'Brilliant', 'Coming up Roses'];
+                const index = parseInt(Math.random() * words.length);
+                document.write(`<h1 id="heading">Everything is ${words[index]}!</h1>`);
+                
+
+                // get the current time
+                let now = new Date();
+                let hour = now.getHours();
+                let minute = now.getMinutes();
+                console.log(hour, minute);
+                
+
+                // determine the appropriate greeting based on the time of day
+                if (hour >= 0 && hour < 6) {
+                    greeting = "Good Night!";
+                } else if (hour >= 6 && hour < 12) {
+                    greeting = "Good Morning!";
+                } else if (hour >= 12 && hour < 18) {
+                    greeting = "Good Afternoon!";
+                } else {
+                    greeting = "Good Evening!";
+                }
+                let backgroundImage = '';
+
+                // determine the appropriate background image based on the time of day
+                if (hour >= 6 && hour < 12) {
+                    backgroundImage = 'morning.png';
+                } else if (hour >= 12 && hour < 18) {
+                    backgroundImage = 'afternoon.png';
+                } else if (hour >= 18 && hour < 24) {
+                    backgroundImage = 'evening.png';
+                } else {
+                    backgroundImage = 'night.png';
+                }
+
+                // change the background image
+                document.write(`<img id="background" src="images/backgrounds/${backgroundImage}">`);
+
+                // convert to 12-hour format and determine period
+                if (hour >= 12) {
+                    period = "pm";
+                    if (hour > 12) {
+                        hour -= 12;
+                    }
+                }
+                if (hour === 0) {
+                    hour = 12;
+                }
+                
+                // generate three unique random numbers between 1 and the user's selected number
+                let luckyNumbers = [];
+                while (luckyNumbers.length < 3) {
+                    let randomNumber = Math.floor(Math.random() * userInput) + 1;
+                    if (!luckyNumbers.includes(randomNumber)) {
+                        luckyNumbers.push(randomNumber);
+                    }
+                }
+
+                const heads = ['head1.png', 'head2.png', 'head3.png', 'head4.png', 'head5.png', 'head6.png'];
+                const bodies = ['body1.png', 'body2.png', 'body3.png', 'body4.png', 'body5.png', 'body6.png'];
+
+                // randomly select a head and a body image
+                const randomHeadIndex = Math.floor(Math.random() * heads.length);
+                const randomBodyIndex = Math.floor(Math.random() * bodies.length);
+                const headImage = heads[randomHeadIndex];
+                const bodyImage = bodies[randomBodyIndex];
+
+                // display the head and body images
+                document.write(`<img id="body" src="images/bodies/${bodyImage}">`);
+                document.write(`<img id="head" src="images/heads/${headImage}">`);
+
+                // display the current time, greeting, and lucky numbers inside the info box
+                document.write(`<div id="info_box">The time is currently ${hour}:${minute < 10 ? '0' + minute : minute} ${period} - ${greeting}<br>Your three lucky numbers today are ${luckyNumbers.join(', ')}</div>`);
+            </script>
+        </div>
+    </body>
+</html>

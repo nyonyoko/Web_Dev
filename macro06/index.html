@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Matching Game</title>
+        <style>
+            body {
+                background-color: black;
+                color: white;
+                font-family: monospace;
+            }
+            .hidden {
+                display: none;
+            }
+            #panel_start, #panel_game, #panel_gameover {
+                /* center the panel */
+                margin: auto;
+                text-align: center;
+            }
+            #game_container {
+                margin: auto;
+                perspective: 1000px;
+            }
+            .game_item {
+                width: 100px;
+                height: 100px;
+                transition: transform 0.5s ease;
+            }
+            .flipped {
+                transform: rotateY(180deg);
+            }
+            #timer {
+                text-align: center;
+                font-size: 200%;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="panel_start">
+            <h1>Memory Matching Madness!</h1>
+            <p>Play a fast-paced game of memory and try and beat your best time</p>
+            <p>Choose your board size: <select id="starting_filter">
+                <option value="easy">3x4</option>
+                <option value="medium">4x5</option>
+                <option value="hard">5x6</option>
+            </select> 
+            Choose your graphic set: <select id="starting_graphics">
+                <option value="pokemon">Pokemon</option>
+                <option value="plants">PvZ Plants</option>
+                <option value="zombies">PvZ Zombies</option>
+            </select>            
+            <button id="button_start">Start!</button>
+            </p>
+        </div>
+        <div id="panel_game" class="hidden">
+            <h1>Ready, Set, Match!</h1>
+            <div id="timer"></div>
+            <div id="game_container">
+            </div>
+        </div>
+        <div id="panel_gameover" class="hidden">
+            <h1>Game Over!</h1>
+            <p id="game_time">Your Time: X</p>
+            <p id="best_time">Best Time: Y</p>
+            <p>Choose your board size: <select id="following_filter">
+                <option value="easy">3x4</option>
+                <option value="medium">4x5</option>
+                <option value="hard">5x6</option>
+            </select> 
+            Choose your graphic set: <select id="following_graphics">
+                <option value="pokemon">Pokemon</option>
+                <option value="plants">PvZ Plants</option>
+                <option value="zombies">PvZ Zombies</option>
+            </select>
+            <button id="button_playagain">Play Again</button>
+            </p>
+        </div>
+
+        <audio id="wrong">
+            <source src="images/wrong.wav" type="audio/wav">
+        </audio>
+        <audio id="correct">
+            <source src="images/correct.wav" type="audio/wav">
+        </audio>
+
+        <script>
+            // DOM queries
+            let panel_start = document.querySelector('#panel_start');
+            let button_start = document.querySelector('#button_start');
+            let panel_game = document.querySelector('#panel_game');
+            let timer = document.querySelector('#timer');
+            let game_container = document.querySelector('#game_container');
+            let panel_gameover = document.querySelector('#panel_gameover');
+            let game_time = document.querySelector('#game_time');
+            let best_time = document.querySelector('#best_time');
+            let button_playagain = document.querySelector('#button_playagain');
+            let wrong = document.querySelector('#wrong');
+            let correct = document.querySelector('#correct');
+            let starting_filter = document.querySelector('#starting_filter');
+            let following_filter = document.querySelector('#following_filter');
+            let starting_graphics = document.querySelector('#starting_graphics');
+            let following_graphics = document.querySelector('#following_graphics');
+
+            const pokemons = ['snorlax.png', 'electrabuzz.png', 'chansey.png', 'oddish.png',
+                        'pikachu.png', 'paras.png', 'arcanine.png', 'ponita.png',
+                        'venonat.png', 'eggsecute.png', 'machop.png', 'pidgey.png',
+                        'psyduck.png', 'tauros.png', 'vulpix.png', 'gloom.png',
+                        'krabby.png', 'butterfree.png', 'bulbasaur.png', 'clefairy.png',
+                        'koffing.png', 'goldeen.png', 'magikarp.png', 'beedrill.png',
+                        'lapras.png', 'meowth.png', 'ekans.png', 'jigglypuff.png',
+                        'horsea.png', 'polywog.png', 'sandshrew.png', 'rattata.png',
+                        'gengar.png', 'eevee.png', 'bellsprout.png', 'squirtle.png',
+                        'seel.png', 'caterpie.png'];
+
+            const plants = ['sunflower.jpg', 'peashooter.jpg', 'wallnut.jpg', 'cherry.jpg',
+                        'repeater.jpg', 'snowpea.jpg', 'chomper.jpg', 'puff.jpg',
+                        'sunshroom.jpg', 'fume.jpg', 'hypno.jpg', 'scaredy.jpg',
+                        'ice.jpg', 'doom.jpg', 'lily.jpg', 'squash.jpg',
+                        'three.jpg', 'tangle.jpg', 'jalapeno.jpg', 'spike.jpg',
+                        'torch.jpg', 'tallnut.jpg', 'sea.jpg', 'plantern.jpg',
+                        'cactus.jpg', 'blover.jpg', 'split.jpg', 'starfruit.jpg',
+                        'pumpkin.jpg', 'magnet.jpg', 'cabbage.jpg', 'pot.jpg',
+                        'corn.jpg', 'coffeebean.jpg', 'garlic.jpg', 'umbrella.jpg',
+                        'goldflower.jpg', 'melon.jpg', 'gatling.jpg', 'twinsunflower.jpg',
+                        'gloom.jpg', 'cattail.jpg', 'wintermelon.jpg', 'goldmagnet.jpg',
+                        'spikerock.jpg', 'corncannon.jpg', 'imitator.jpg', 'potato.jpg', 
+                        'grave.jpg'];
+
+            const zombies = ['normal.jpg', 'conehead.jpg', 'buckethead.jpg', 'flag.jpg', 
+                        'pole.jpg', 'football.jpg', 'dancing.jpg', 'dancer.jpg',
+                        'newspaper.jpg', 'screendoor.jpg', 'gargantuar.jpg', 'imp.jpg',
+                        'dr.jpg', 'snorkel.jpg', 'zomboni.jpg', 'dolphin.jpg',
+                        'box.jpg', 'balloon.jpg', 'digger.jpg', 'pogo.jpg',
+                        'yeti.jpg', 'bungee.jpg', 'ladder.jpg', 'catapult.jpg',
+                        'gigagargantuar.jpg', 'gigafootball.jpg', 'team.jpg', 'ducky.jpg'];
+            
+            // create a dictionary to store the following:
+            // board size difficulty, game container width, game container height, number of pairs
+            // as well as which set of graphics to use
+            // last element is the index of the option for use in changing the default option shown
+            const board_info = {
+                'easy': [400, 300, 6, 0],
+                'medium': [500, 400, 10, 1],
+                'hard': [600, 500, 15, 3, 2],
+                'pokemon': [pokemons, 'images/pokeball.png','images/', 0],
+                'plants': [plants, 'images/pvz/vase.jpg','images/pvz/plants/', 1],
+                'zombies': [zombies, 'images/pvz/vase.jpg','images/pvz/zombies/', 2]
+            };
+
+            // check if there is localStorage of preferred size and graphics
+            // if not, set the preferred size to easy and graphics to pokemon
+            // also set the default option shown in the select
+            // if there is, set the default option shown in the select
+            if (getPreferredSize() == null) {
+                setPreferredSize('easy');
+                starting_filter.options[board_info['easy'][3]].selected = true;
+            } else {
+                starting_filter.options[board_info[getPreferredSize()][3]].selected = true;
+            }
+
+            if (getPreferredGraphics() == null) {
+                setPreferredGraphics('pokemon');
+                starting_graphics.options[board_info['pokemon'][3]].selected = true;
+            } else {
+                starting_graphics.options[board_info[getPreferredGraphics()][3]].selected = true;
+            }
+
+            let t;
+            let starting_interval, following_interval;
+
+            button_start.onclick = function(event) {
+                t = 0;
+                timer.innerText = 'Time elapsed: ' + t;
+                panel_start.classList.add('hidden');
+                panel_game.classList.remove('hidden');
+                setupPicks(starting_filter.value, starting_graphics.value);
+                setupBoard(starting_graphics.value);
+                starting_interval = setInterval( function() {
+                    t += 1;
+                    timer.innerText = 'Time elapsed: ' + t;
+                }, 1000);
+            }
+
+            button_playagain.onclick = function(event) {
+                t = 0;
+                timer.innerText = 'Time elapsed: ' + t;
+                panel_gameover.classList.add('hidden');
+                panel_game.classList.remove('hidden');
+                setupPicks(following_filter.value, following_graphics.value);
+                // clear the board
+                game_container.innerHTML = '';
+                setupBoard(following_graphics.value);
+                following_interval = setInterval( function() {
+                    t += 1;
+                    timer.innerText = 'Time elapsed: ' + t;
+                }, 1000);
+            }
+
+            // use the Fisher-Yates shuffle algorithm to randomly shuffle the array
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // generate a random array of the necessary number of pairs of pokemons
+            let picks, pair_num;
+            function setupPicks(difficulty, graphics) {
+                // set the width and height of the game container
+                game_container.style.width = board_info[difficulty][0] + 'px';
+                game_container.style.height = board_info[difficulty][1] + 'px';
+
+                // store the preferred size and graphics set in localStorage
+                setPreferredSize(difficulty);
+                setPreferredGraphics(graphics);
+
+                // set the number of pairs
+                pair_num = board_info[difficulty][2];
+
+                picks = [];
+
+                for (let i = 0; i < pair_num; i++) {
+                    let assets = board_info[graphics][0];
+                    let index = parseInt( Math.random() * assets.length );
+                    picks.push( assets[index] );
+                    picks.push( assets[index] );
+                }
+                picks = shuffleArray(picks);
+            }
+
+            // keep track of the count of matched pokemons, the two tokens, the best player name
+            let count, token1, token2, newname;
+
+            function setupBoard(graphics) {
+                // reset the board
+                count=0;
+                token1 = false;
+                token2 = false;
+
+                // create the tokens
+                for (let i = 0; i < picks.length; i++) {
+                    let img = document.createElement('img');
+                    img.src = board_info[graphics][1];
+                    img.dataset.secret = board_info[graphics][2] + picks[i];
+                    img.classList.add('game_item');
+                    game_container.appendChild(img);
+                    
+                    
+                    img.onclick = function(e) {
+                        // check if the token is already matched
+                        if (e.currentTarget.classList.contains('matched')) {
+                            return;
+                        }
+                        // Inside the click event handler for the image
+                        e.currentTarget.classList.add('flipped');
+                        // 1st click?
+                        if (token1 == false) {
+                            token1 = e.currentTarget;
+                            token1.src = token1.dataset.secret;
+                        }
+                        // 2nd click?
+                        else if (token2 == false) {
+                            // prevent double-clicking the same token
+                            // and prevent clicking on tokens already matched
+                            if (token1 != e.currentTarget) {
+                                token2 = e.currentTarget;
+                                token2.src = token2.dataset.secret;
+                                if (token1.src == token2.src) {
+                                    correct.play();
+                                    count += 2;
+                                    token1.classList.add('matched');
+                                    token2.classList.add('matched');
+                                    token1 = false;
+                                    token2 = false;
+                                    if (count == pair_num * 2) {
+                                        count = 0;
+                                        panel_gameover.classList.remove('hidden');
+                                        panel_game.classList.add('hidden');
+                                        game_time.innerText = 'Your Time: ' + t;
+                                        if (getBestTime() == null || t < getBestTime()) {
+                                            setBestTime(t);
+                                            newname = prompt("Congratulations! You have a new high score! Please enter your name: "); 
+                                            setBestName(newname);
+                                            best_time.innerText = 'Best Time: ' + t + ' - New High Score by ' + newname + '!';
+                                        } else {
+                                            best_time.innerText = 'Best Time: ' + getBestTime() + ' by ' + getBestName();
+                                        }
+                                        if (starting_interval) {
+                                            clearInterval(starting_interval);
+                                        } else {
+                                            clearInterval(following_interval);
+                                        }
+                                        // make changes to the two select
+                                        // extract from localStorage and show the default value as the preferred size and graphics
+                                        let preferred_size = getPreferredSize();
+                                        let preferred_graphics = getPreferredGraphics();
+                                        starting_filter.options[board_info[preferred_size][3]].selected = true;
+                                        following_filter.options[board_info[preferred_size][3]].selected = true;
+                                        starting_graphics.options[board_info[preferred_graphics][3]].selected = true;
+                                        following_graphics.options[board_info[preferred_graphics][3]].selected = true;
+                                    }
+                                } else {
+                                    wrong.play();
+                                    setTimeout( function() {
+                                        token1.src = board_info[graphics][1];
+                                        token2.src = board_info[graphics][1];
+                                        token1.classList.remove('flipped');
+                                        token2.classList.remove('flipped');
+                                        token1 = false;
+                                        token2 = false;
+                                    }, 1000);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // function to retrieve the best time from localStorage
+            function getBestTime() {
+                return localStorage.getItem('best_time');
+            }
+
+            // function to set the best time in localStorage
+            function setBestTime(time) {
+                localStorage.setItem('best_time', time);
+            }
+
+            // function to retrieve the best player name from localStorage
+            function getBestName() {
+                return localStorage.getItem('best_name');
+            }
+
+            // function to set the best player name in localStorage
+            function setBestName(name) {
+                localStorage.setItem('best_name', name);
+            }
+
+            // function to set the preferred size and graphics set
+            function getPreferredSize() {
+                return localStorage.getItem('preferred_size');
+            }
+
+            function setPreferredSize(size) {
+                localStorage.setItem('preferred_size', size);
+            }
+
+            function getPreferredGraphics() {
+                return localStorage.getItem('preferred_graphics');
+            }
+
+            function setPreferredGraphics(graphics) {
+                localStorage.setItem('preferred_graphics', graphics);
+            }
+
+        </script>
+    </body>
+</html>
